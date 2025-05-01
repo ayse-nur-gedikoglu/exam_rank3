@@ -1,16 +1,16 @@
-#include <unistd.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 int ft_putchar(char c)
 {
     write(1, &c, 1);
     return (1);
 }
-
 int ft_putstr(char *str)
 {
-    int i = 0;
-    
+    int i;
+
+    i = 0;
     if (!str)
         return (write(1, "(null)", 6));
     while (str[i])
@@ -23,70 +23,65 @@ int ft_putstr(char *str)
 
 int ft_putnbr(int nb)
 {
+    long n = nb;
     int i = 0;
     
-    if (nb == -2147483648)
+    if (n < 0)
     {
         i += ft_putchar('-');
-        i += ft_putchar('2');
-        nb = 147483648;
+        n = -n;
     }
-    if (nb < 0)
-    {
-        i += ft_putchar('-');
-        nb = -nb;
-    }
-    if (nb > 9)
-    {
-        i += ft_putnbr(nb / 10);
-        nb = nb % 10;
-    }
-    i += ft_putchar(nb + '0');
+    if (n >= 10)
+        i += ft_putnbr(n / 10);
+    i += ft_putchar((n % 10) + '0');
     return (i);
 }
 
 int ft_puthex(unsigned int nb)
 {
+    int i;
     char *hex = "0123456789abcdef";
-    int i = 0;
     
+    i = 0;
     if (nb >= 16)
         i += ft_puthex(nb / 16);
     i += ft_putchar(hex[nb % 16]);
     return (i);
 }
 
-int ft_format(char c, va_list arg)
+int ft_format(char c, va_list args)
 {
     if (c == 's')
-        return (ft_putstr(va_arg(arg, char *)));
+        return (ft_putstr(va_arg(args, char *)));
     else if (c == 'd')
-        return (ft_putnbr(va_arg(arg, int)));
+        return (ft_putnbr(va_arg(args, int)));
     else if (c == 'x')
-        return (ft_puthex(va_arg(arg, unsigned int)));
+        return (ft_puthex(va_arg(args, unsigned int)));
     else if (c == '%')
         return (ft_putchar('%'));
     return (0);
-}
+} 
 
-int ft_printf(const char *str, ...)
+int ft_printf(const char *format, ...)
 {
-    int len = 0;
-    int i = 0;
-    va_list arg;
-    
-    va_start(arg, str);
-    while (str[i])
+    va_list args;
+    int i;
+    int len;
+
+    i = 0;
+    len = 0;
+    va_start(args, format);
+    while (format[i])
     {
-        if (str[i] == '%' && str[i + 1])
+        if (format[i] == '%' && format[i + 1] != '\0')
         {
-            len += ft_format(str[i + 1], arg);
+            len += ft_format(format[i + 1], args);
             i++;
         }
         else
-            len += ft_putchar(str[i]);
+            len += ft_putchar(format[i]);
         i++;
     }
-    va_end(arg);
+    va_end(args);
     return (len);
 }
